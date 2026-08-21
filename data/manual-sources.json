@@ -1,0 +1,54 @@
+{
+  "google_scholar": {
+    "observed_at": "2026-08-20",
+    "profile_url": "https://scholar.google.com/citations?user=ZIIlvkAAAAAJ&hl=es",
+    "metrics": {
+      "papers": 8,
+      "citations": 29,
+      "h_index": 3,
+      "i10_index": 1
+    },
+    "papers": [
+      {
+        "title": "6G Architecture for Enabling Predictable, Reliable and Deterministic Networks: The PREDICT6G Case",
+        "year": 2024,
+        "citations": 11
+      },
+      {
+        "title": "Towards 6G Architecture: Key Concepts, Challenges, and Building Blocks",
+        "year": 2025,
+        "citations": 6
+      },
+      {
+        "title": "Experimentation on a Wireless Multi-Domain Deterministic Network: The SLICES-Madrid Approach",
+        "year": 2025,
+        "citations": 5
+      },
+      {
+        "title": "Experimental Evaluation of a Multi-Domain TSN Scenario in Industry 4.0",
+        "year": 2024,
+        "citations": 3
+      },
+      {
+        "title": "Artificial Intelligence Control Plane for Deterministic Networks Proof-of-Concept",
+        "year": 2024,
+        "citations": 2
+      },
+      {
+        "title": "Bridging the Gap Between TSN and Open-Source",
+        "year": 2025,
+        "citations": 1
+      },
+      {
+        "title": "Demonstration of a Control Plane in Support of E2E Deterministic Service Provisioning over a Multi-Domain Multi-Technology 6G Network",
+        "year": 2025,
+        "citations": 1
+      },
+      {
+        "title": "PREDICT-6G to the Test: An Industry 4.0 Use Case for Deterministic 6G Networks via AI-Enabled Multi-Domain Orchestration",
+        "year": 2025,
+        "citations": 0
+      }
+    ]
+  }
+}

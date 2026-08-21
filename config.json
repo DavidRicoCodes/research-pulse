@@ -1,0 +1,16 @@
+{
+  "researcher": {
+    "name": "David Rico",
+    "full_name": "David Rico Menéndez",
+    "affiliation": "Universidad Carlos III de Madrid",
+    "scholar_id": "ZIIlvkAAAAAJ",
+    "orcid": "0009-0002-3578-5517",
+    "openalex_ids": ["A5099980835", "A5114996487"],
+    "semantic_scholar_ids": ["2342699301", "2425315603"]
+  },
+  "dashboard": {
+    "primary_source": "google_scholar",
+    "citation_milestone": 50,
+    "paper_milestone": 10
+  }
+}
