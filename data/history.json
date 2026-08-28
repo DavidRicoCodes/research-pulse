@@ -1344,6 +1344,174 @@
         }
       ],
       "warnings": []
+    },
+    {
+      "date": "2026-08-28",
+      "collected_at": "2026-08-28T16:39:07+00:00",
+      "researcher": {
+        "name": "David Rico",
+        "full_name": "David Rico Menéndez",
+        "affiliation": "Universidad Carlos III de Madrid",
+        "scholar_id": "ZIIlvkAAAAAJ",
+        "orcid": "0009-0002-3578-5517",
+        "openalex_ids": [
+          "A5099980835",
+          "A5114996487"
+        ],
+        "semantic_scholar_ids": [
+          "2342699301",
+          "2425315603"
+        ]
+      },
+      "sources": {
+        "google_scholar": {
+          "metrics": {
+            "papers": 8,
+            "citations": 29,
+            "h_index": 3,
+            "i10_index": 1
+          },
+          "observed_at": "2026-08-20",
+          "profile_url": "https://scholar.google.com/citations?user=ZIIlvkAAAAAJ&hl=es"
+        },
+        "semantic_scholar": {
+          "metrics": {
+            "papers": 8,
+            "citations": 33,
+            "h_index": 3,
+            "i10_index": 1
+          },
+          "observed_at": null,
+          "profile_url": null
+        },
+        "openalex": {
+          "metrics": {
+            "papers": 8,
+            "citations": 16,
+            "h_index": 3,
+            "i10_index": 0
+          },
+          "observed_at": null,
+          "profile_url": null
+        }
+      },
+      "papers": [
+        {
+          "id": "doi:10.1109/infocom59046.2026.11571727",
+          "title": "NextSense: A Semi-Synthetic Sensing Data generation Platform",
+          "year": 2026,
+          "doi": "https://doi.org/10.1109/infocom59046.2026.11571727",
+          "url": "https://openalex.org/W7166548051",
+          "sources": {
+            "openalex": 0,
+            "semantic_scholar": 0
+          }
+        },
+        {
+          "id": "doi:10.48550/arxiv.2606.28341",
+          "title": "Latency Components in 5G for Edge Application Discovery and Proximity Services: Targets, Measurements, and Practical Working Points",
+          "year": 2026,
+          "doi": "https://doi.org/10.48550/arxiv.2606.28341",
+          "url": "https://openalex.org/W7166654226",
+          "sources": {
+            "openalex": 0,
+            "semantic_scholar": 0
+          }
+        },
+        {
+          "id": "title:towards6garchitecturekeyconceptschallengesandbuildingblocks",
+          "title": "Towards 6G Architecture: Key Concepts, Challenges, and Building Blocks",
+          "year": 2025,
+          "doi": null,
+          "url": null,
+          "sources": {
+            "google_scholar": 6
+          }
+        },
+        {
+          "id": "title:predict6gtothetestanindustry40usecasefordeterministic6gnetworksviaaienabledmultidomainorchestration",
+          "title": "PREDICT-6G to the Test: An Industry 4.0 Use Case for Deterministic 6G Networks via AI-Enabled Multi-Domain Orchestration",
+          "year": 2025,
+          "doi": null,
+          "url": null,
+          "sources": {
+            "google_scholar": 0
+          }
+        },
+        {
+          "id": "doi:10.1109/mcom.001.2400320",
+          "title": "Experimentation on A Wireless Multi-Domain Deterministic Network: The SLICES-Madrid Approach",
+          "year": 2025,
+          "doi": "https://doi.org/10.1109/mcom.001.2400320",
+          "url": "https://openalex.org/W4406891626",
+          "sources": {
+            "openalex": 3,
+            "semantic_scholar": 4,
+            "google_scholar": 5
+          }
+        },
+        {
+          "id": "doi:10.1109/icton67126.2025.11125371",
+          "title": "Demonstration of a Control Plane in Support of E2E Deterministic Service Provisioning over a Multi-domain Multi-technology 6G Network",
+          "year": 2025,
+          "doi": "https://doi.org/10.1109/icton67126.2025.11125371",
+          "url": "https://openalex.org/W4413557143",
+          "sources": {
+            "openalex": 1,
+            "semantic_scholar": 1,
+            "google_scholar": 1
+          }
+        },
+        {
+          "id": "doi:10.1109/icton67126.2025.11125377",
+          "title": "Bridging the gap between TSN and Open-Source",
+          "year": 2025,
+          "doi": "https://doi.org/10.1109/icton67126.2025.11125377",
+          "url": "https://openalex.org/W4413555833",
+          "sources": {
+            "openalex": 0,
+            "semantic_scholar": 1,
+            "google_scholar": 1
+          }
+        },
+        {
+          "id": "doi:10.1145/3636534.3696726",
+          "title": "Experimental Evaluation of a Multi-Domain TSN Scenario in Industry 4.0",
+          "year": 2024,
+          "doi": "https://doi.org/10.1145/3636534.3696726",
+          "url": "https://openalex.org/W4405014723",
+          "sources": {
+            "openalex": 3,
+            "semantic_scholar": 3,
+            "google_scholar": 3
+          }
+        },
+        {
+          "id": "doi:10.1145/3636534.3696725",
+          "title": "Artificial Intelligence Control Plane for Deterministic Networks Proof-of-Concept",
+          "year": 2024,
+          "doi": "https://doi.org/10.1145/3636534.3696725",
+          "url": "https://openalex.org/W4405014207",
+          "sources": {
+            "openalex": 1,
+            "semantic_scholar": 1,
+            "google_scholar": 2
+          }
+        },
+        {
+          "id": "doi:10.1109/wcnc57260.2024.10571097",
+          "title": "6G Architecture for Enabling Predictable, Reliable and Deterministic Networks: the PREDICT6G Case",
+          "year": 2024,
+          "doi": "https://doi.org/10.1109/wcnc57260.2024.10571097",
+          "url": "https://openalex.org/W4400276382",
+          "sources": {
+            "openalex": 8,
+            "semantic_scholar": 23,
+            "google_scholar": 11
+          }
+        }
+      ],
+      "warnings": []
     }
   ]
 }
