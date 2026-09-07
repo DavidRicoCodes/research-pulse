@@ -15,15 +15,17 @@ Después abre <http://localhost:8000>. No abras `index.html` directamente: los n
 
 ## Fuentes
 
-- Google Scholar: perfil `ZIIlvkAAAAAJ`. El snapshot se guarda en `data/manual-sources.json` y se fecha explícitamente para no presentar datos antiguos como actuales.
+- Google Scholar: perfil `ZIIlvkAAAAAJ`. El colector intenta leer una vez al día el perfil público; `data/manual-sources.json` conserva el último snapshot manual como fallback si Google bloquea temporalmente la consulta.
 - OpenAlex: perfiles `A5099980835` y `A5114996487`.
 - Semantic Scholar: perfiles `2342699301` y `2425315603`.
 
-El colector fusiona artículos por DOI y, cuando falta, por un título normalizado. Para perfiles duplicados del mismo proveedor conserva el mayor recuento de citas del artículo; nunca suma ambos perfiles.
+El colector fusiona artículos por DOI y, cuando falta, por un título normalizado. Para perfiles duplicados del mismo proveedor conserva el mayor recuento de citas del artículo; nunca suma ambos perfiles. El dashboard agrupa el histórico de Scholar por fecha real de observación, de modo que un fallback antiguo no simula días de medición inexistentes.
 
 ## Automatización
 
 `.github/workflows/collect.yml` ejecuta el colector diariamente a las 04:17 UTC y guarda el snapshot en Git. Al publicar el repositorio con GitHub Pages, la raíz del repositorio es el dashboard y no necesita servidor ni base de datos.
+
+Google Scholar bloquea habitualmente las direcciones IP de los runners de GitHub. En este equipo, la tarea programada `Research Pulse - Google Scholar` ejecuta `scripts/refresh-local.ps1` a las 20:00. El script hace una sola consulta al perfil público, exige que el dato tenga fecha de hoy y publica únicamente `data/history.json`; si hay cambios locales, un bloqueo de Google o un error de red, se detiene sin sobrescribir nada. El registro local se guarda en `.logs/scholar-refresh.log` y no se publica.
 
 ## Próximos pasos
 

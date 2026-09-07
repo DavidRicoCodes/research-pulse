@@ -14,7 +14,14 @@ function metric(label, value, note) {
 }
 
 function chart(snapshots, sourceName) {
-  const points = snapshots.map(s => ({ date: s.date, value: s.sources[sourceName]?.metrics?.citations })).filter(p => Number.isFinite(p.value));
+  const observations = new Map();
+  snapshots.forEach(snapshot => {
+    const source = snapshot.sources[sourceName];
+    if (source && Number.isFinite(source.metrics?.citations)) {
+      observations.set(source.observed_at || snapshot.date, source.metrics.citations);
+    }
+  });
+  const points = [...observations].map(([date, value]) => ({ date, value }));
   if (!points.length) return `<p class="error">Todavía no hay datos históricos.</p>`;
   if (points.length === 1) return `<div class="first-snapshot"><strong>${number(points[0].value)}</strong><span>PRIMER SNAPSHOT · ${points[0].date}</span><small>La trayectoria aparecerá tras la próxima recogida.</small></div>`;
   const width = 700, height = 190, padX = 12, padY = 15;
@@ -38,8 +45,11 @@ function render(history, config) {
   const primary = latest.sources[primaryName] || Object.values(latest.sources)[0];
   const m = primary.metrics;
   const observed = primary.observed_at || latest.date;
+  const primaryFresh = observed === latest.date;
   document.getElementById("today").textContent = new Date(observed + "T12:00:00").toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric" }).toUpperCase();
-  document.getElementById("statusText").textContent = latest.warnings?.length ? "Actualizado con avisos" : "Datos sincronizados";
+  document.getElementById("statusText").textContent = latest.warnings?.length
+    ? "Actualizado con avisos"
+    : primaryFresh ? "Datos sincronizados" : `Scholar observado ${observed}`;
   document.getElementById("updated").textContent = `ÚLTIMA RECOGIDA ${latest.collected_at.slice(0, 16).replace("T", " ")} UTC`;
   document.getElementById("metrics").innerHTML = [
     metric("CITAS", m.citations, SOURCE_LABELS[primaryName]),
