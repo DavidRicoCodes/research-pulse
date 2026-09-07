@@ -25,6 +25,8 @@ El colector fusiona artículos por DOI y, cuando falta, por un título normaliza
 
 `.github/workflows/collect.yml` ejecuta el colector diariamente a las 04:17 UTC y guarda el snapshot en Git. Al publicar el repositorio con GitHub Pages, la raíz del repositorio es el dashboard y no necesita servidor ni base de datos.
 
+Google Scholar bloquea habitualmente las direcciones IP de los runners de GitHub. En este equipo, la tarea programada `Research Pulse - Google Scholar` ejecuta `scripts/refresh-local.ps1` a las 20:00. El script hace una sola consulta al perfil público, exige que el dato tenga fecha de hoy y publica únicamente `data/history.json`; si hay cambios locales, un bloqueo de Google o un error de red, se detiene sin sobrescribir nada. El registro local se guarda en `.logs/scholar-refresh.log` y no se publica.
+
 ## Próximos pasos
 
 1. Confirmar qué artículos pertenecen realmente a David cuando una fuente encuentre candidatos nuevos.
