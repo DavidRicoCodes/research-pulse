@@ -15,11 +15,11 @@ Después abre <http://localhost:8000>. No abras `index.html` directamente: los n
 
 ## Fuentes
 
-- Google Scholar: perfil `ZIIlvkAAAAAJ`. El snapshot se guarda en `data/manual-sources.json` y se fecha explícitamente para no presentar datos antiguos como actuales.
+- Google Scholar: perfil `ZIIlvkAAAAAJ`. El colector intenta leer una vez al día el perfil público; `data/manual-sources.json` conserva el último snapshot manual como fallback si Google bloquea temporalmente la consulta.
 - OpenAlex: perfiles `A5099980835` y `A5114996487`.
 - Semantic Scholar: perfiles `2342699301` y `2425315603`.
 
-El colector fusiona artículos por DOI y, cuando falta, por un título normalizado. Para perfiles duplicados del mismo proveedor conserva el mayor recuento de citas del artículo; nunca suma ambos perfiles.
+El colector fusiona artículos por DOI y, cuando falta, por un título normalizado. Para perfiles duplicados del mismo proveedor conserva el mayor recuento de citas del artículo; nunca suma ambos perfiles. El dashboard agrupa el histórico de Scholar por fecha real de observación, de modo que un fallback antiguo no simula días de medición inexistentes.
 
 ## Automatización
 

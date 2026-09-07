@@ -1,10 +1,10 @@
 {
   "google_scholar": {
-    "observed_at": "2026-08-20",
+    "observed_at": "2026-09-07",
     "profile_url": "https://scholar.google.com/citations?user=ZIIlvkAAAAAJ&hl=es",
     "metrics": {
-      "papers": 8,
-      "citations": 29,
+      "papers": 9,
+      "citations": 31,
       "h_index": 3,
       "i10_index": 1
     },
@@ -22,12 +22,12 @@
       {
         "title": "Experimentation on a Wireless Multi-Domain Deterministic Network: The SLICES-Madrid Approach",
         "year": 2025,
-        "citations": 5
+        "citations": 6
       },
       {
         "title": "Experimental Evaluation of a Multi-Domain TSN Scenario in Industry 4.0",
         "year": 2024,
-        "citations": 3
+        "citations": 4
       },
       {
         "title": "Artificial Intelligence Control Plane for Deterministic Networks Proof-of-Concept",
@@ -47,6 +47,11 @@
       {
         "title": "PREDICT-6G to the Test: An Industry 4.0 Use Case for Deterministic 6G Networks via AI-Enabled Multi-Domain Orchestration",
         "year": 2025,
+        "citations": 0
+      },
+      {
+        "title": "NextSense: A Semi-Synthetic Sensing Data generation Platform",
+        "year": 2026,
         "citations": 0
       }
     ]

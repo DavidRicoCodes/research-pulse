@@ -16,6 +16,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from datetime import datetime, timezone
+from html.parser import HTMLParser
 from pathlib import Path
 from typing import Any
 
@@ -46,6 +47,112 @@ def get_json(url: str, retries: int = 3) -> dict[str, Any]:
                 raise RuntimeError(f"Could not fetch {url}: {exc}") from exc
             time.sleep(2**attempt)
     raise AssertionError("unreachable")
+
+
+def get_text(url: str, retries: int = 3) -> str:
+    request = urllib.request.Request(
+        url,
+        headers={
+            "User-Agent": "Mozilla/5.0 (compatible; ResearchPulse/1.0)",
+            "Accept-Language": "es-ES,es;q=0.9,en;q=0.7",
+        },
+    )
+    for attempt in range(retries):
+        try:
+            with urllib.request.urlopen(request, timeout=30) as response:
+                return response.read().decode(response.headers.get_content_charset() or "utf-8")
+        except (urllib.error.URLError, TimeoutError) as exc:
+            if attempt + 1 == retries:
+                raise RuntimeError(f"Could not fetch {url}: {exc}") from exc
+            time.sleep(2**attempt)
+    raise AssertionError("unreachable")
+
+
+class ScholarProfileParser(HTMLParser):
+    """Extract public totals and the visible publication table from Scholar."""
+
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.metrics: list[str] = []
+        self.papers: list[dict[str, str]] = []
+        self._metric_parts: list[str] | None = None
+        self._paper: dict[str, str] | None = None
+        self._field: str | None = None
+        self._field_tag: str | None = None
+
+    @staticmethod
+    def _classes(attrs: list[tuple[str, str | None]]) -> set[str]:
+        value = dict(attrs).get("class") or ""
+        return set(value.split())
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        classes = self._classes(attrs)
+        if tag == "td" and "gsc_rsb_std" in classes:
+            self._metric_parts = []
+        if tag == "tr" and "gsc_a_tr" in classes:
+            self._paper = {"title": "", "citations": "", "year": ""}
+        if self._paper is not None:
+            if tag == "a" and "gsc_a_at" in classes:
+                self._field, self._field_tag = "title", tag
+            elif tag == "a" and "gsc_a_ac" in classes:
+                self._field, self._field_tag = "citations", tag
+            elif tag == "span" and "gsc_a_hc" in classes:
+                self._field, self._field_tag = "year", tag
+
+    def handle_data(self, data: str) -> None:
+        if self._metric_parts is not None:
+            self._metric_parts.append(data)
+        if self._paper is not None and self._field:
+            self._paper[self._field] += data
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag == "td" and self._metric_parts is not None:
+            self.metrics.append("".join(self._metric_parts).strip())
+            self._metric_parts = None
+        if self._field_tag == tag:
+            self._field = self._field_tag = None
+        if tag == "tr" and self._paper is not None:
+            if self._paper["title"].strip():
+                self.papers.append({key: value.strip() for key, value in self._paper.items()})
+            self._paper = None
+
+
+def collect_google_scholar(
+    scholar_id: str, papers: dict[str, dict[str, Any]], observed_at: str
+) -> dict[str, Any]:
+    profile_url = (
+        "https://scholar.google.com/citations?"
+        + urllib.parse.urlencode({"user": scholar_id, "hl": "es"})
+    )
+    parser = ScholarProfileParser()
+    parser.feed(get_text(profile_url))
+    if len(parser.metrics) < 5 or not parser.papers:
+        raise RuntimeError("Google Scholar returned an incomplete or blocked profile")
+
+    try:
+        reported = {
+            "papers": len(parser.papers),
+            "citations": int(parser.metrics[0]),
+            "h_index": int(parser.metrics[2]),
+            "i10_index": int(parser.metrics[4]),
+        }
+    except (ValueError, IndexError) as exc:
+        raise RuntimeError("Google Scholar returned unexpected metric values") from exc
+
+    for work in parser.papers:
+        upsert_paper(
+            papers,
+            title=work["title"],
+            year=int(work["year"]) if work["year"].isdigit() else None,
+            doi=None,
+            source="google_scholar",
+            citations=int(work["citations"]) if work["citations"].isdigit() else 0,
+        )
+    return {
+        "observed_at": observed_at,
+        "profile_url": profile_url,
+        "reported_metrics": reported,
+    }
 
 
 def normalized_title(title: str) -> str:
@@ -135,10 +242,13 @@ def collect_semantic_scholar(ids: list[str], papers: dict[str, dict[str, Any]]) 
 
 
 def add_manual_sources(
-    manual: dict[str, Any], papers: dict[str, dict[str, Any]]
+    manual: dict[str, Any], papers: dict[str, dict[str, Any]], skip_sources: set[str] | None = None
 ) -> dict[str, dict[str, Any]]:
     metadata: dict[str, dict[str, Any]] = {}
+    skip_sources = skip_sources or set()
     for source, payload in manual.items():
+        if source in skip_sources:
+            continue
         metadata[source] = {
             "observed_at": payload.get("observed_at"),
             "profile_url": payload.get("profile_url"),
@@ -175,6 +285,14 @@ def main() -> int:
     papers: dict[str, dict[str, Any]] = {}
     errors: list[str] = []
 
+    now = datetime.now(timezone.utc)
+    live_metadata: dict[str, dict[str, Any]] = {}
+    try:
+        live_metadata["google_scholar"] = collect_google_scholar(
+            researcher["scholar_id"], papers, now.date().isoformat()
+        )
+    except RuntimeError as exc:
+        errors.append(str(exc))
     try:
         collect_openalex(researcher.get("openalex_ids", []), papers)
     except RuntimeError as exc:
@@ -184,10 +302,13 @@ def main() -> int:
     except RuntimeError as exc:
         errors.append(str(exc))
 
-    manual_metadata = add_manual_sources(load_json(MANUAL_PATH, {}), papers)
+    manual_metadata = add_manual_sources(
+        load_json(MANUAL_PATH, {}), papers, skip_sources=set(live_metadata)
+    )
+    source_metadata = {**manual_metadata, **live_metadata}
     sources: dict[str, Any] = {}
     for source in ("google_scholar", "semantic_scholar", "openalex"):
-        metadata = manual_metadata.get(source, {})
+        metadata = source_metadata.get(source, {})
         available = any(source in paper["sources"] for paper in papers.values())
         if available or metadata:
             sources[source] = {
@@ -196,7 +317,6 @@ def main() -> int:
                 "profile_url": metadata.get("profile_url"),
             }
 
-    now = datetime.now(timezone.utc)
     snapshot = {
         "date": now.date().isoformat(),
         "collected_at": now.isoformat(timespec="seconds"),
