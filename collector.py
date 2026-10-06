@@ -279,11 +279,33 @@ def source_metrics(
     return {**computed, **(reported or {})}
 
 
+def latest_fallback(source: str, history: dict[str, Any], manual: dict[str, Any]) -> dict[str, Any] | None:
+    """Select by observation date, never by citation count or collection date."""
+    candidates = []
+    if source in manual:
+        candidates.append(manual[source])
+    for snapshot in history.get("snapshots", []):
+        saved = snapshot.get("sources", {}).get(source)
+        if saved:
+            candidates.append({
+                "observed_at": saved.get("observed_at") or snapshot["date"],
+                "profile_url": saved.get("profile_url"),
+                "metrics": saved["metrics"],
+                "papers": [
+                    {**paper, "citations": paper["sources"][source]}
+                    for paper in snapshot.get("papers", []) if source in paper["sources"]
+                ],
+            })
+    return max(candidates, key=lambda item: item.get("observed_at") or "", default=None)
+
+
 def main() -> int:
     config = load_json(CONFIG_PATH, {})
     researcher = config["researcher"]
     papers: dict[str, dict[str, Any]] = {}
     errors: list[str] = []
+    history = load_json(HISTORY_PATH, {"schema_version": 1, "snapshots": []})
+    manual = load_json(MANUAL_PATH, {})
 
     now = datetime.now(timezone.utc)
     live_metadata: dict[str, dict[str, Any]] = {}
@@ -294,17 +316,31 @@ def main() -> int:
     except RuntimeError as exc:
         errors.append(str(exc))
     try:
-        collect_openalex(researcher.get("openalex_ids", []), papers)
+        source_papers: dict[str, dict[str, Any]] = {}
+        collect_openalex(researcher.get("openalex_ids", []), source_papers)
+        for paper in source_papers.values():
+            upsert_paper(papers, title=paper["title"], year=paper["year"], doi=paper["doi"],
+                         source="openalex", citations=paper["sources"]["openalex"], url=paper["url"])
+        live_metadata["openalex"] = {"observed_at": now.date().isoformat()}
     except RuntimeError as exc:
         errors.append(str(exc))
     try:
-        collect_semantic_scholar(researcher.get("semantic_scholar_ids", []), papers)
+        source_papers = {}
+        collect_semantic_scholar(researcher.get("semantic_scholar_ids", []), source_papers)
+        for paper in source_papers.values():
+            upsert_paper(papers, title=paper["title"], year=paper["year"], doi=paper["doi"],
+                         source="semantic_scholar", citations=paper["sources"]["semantic_scholar"], url=paper["url"])
+        live_metadata["semantic_scholar"] = {"observed_at": now.date().isoformat()}
     except RuntimeError as exc:
         errors.append(str(exc))
 
-    manual_metadata = add_manual_sources(
-        load_json(MANUAL_PATH, {}), papers, skip_sources=set(live_metadata)
-    )
+    fallbacks = {}
+    for source in ("google_scholar", "semantic_scholar", "openalex"):
+        if source not in live_metadata:
+            fallback = latest_fallback(source, history, manual)
+            if fallback:
+                fallbacks[source] = fallback
+    manual_metadata = add_manual_sources(fallbacks, papers)
     source_metadata = {**manual_metadata, **live_metadata}
     sources: dict[str, Any] = {}
     for source in ("google_scholar", "semantic_scholar", "openalex"):
@@ -315,6 +351,7 @@ def main() -> int:
                 "metrics": source_metrics(source, papers, metadata.get("reported_metrics")),
                 "observed_at": metadata.get("observed_at"),
                 "profile_url": metadata.get("profile_url"),
+                "status": "fresh" if source in live_metadata else "cached",
             }
 
     snapshot = {
@@ -326,7 +363,6 @@ def main() -> int:
         "warnings": errors,
     }
 
-    history = load_json(HISTORY_PATH, {"schema_version": 1, "snapshots": []})
     snapshots = history.setdefault("snapshots", [])
     snapshots[:] = [item for item in snapshots if item.get("date") != snapshot["date"]]
     snapshots.append(snapshot)
