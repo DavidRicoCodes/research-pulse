@@ -17,6 +17,8 @@ jobs:
         with:
           python-version: "3.12"
       - name: Collect public metrics
+        env:
+          SCHOLAR_ENABLED: "0"
         run: python collector.py
       - name: Commit snapshot if it changed
         run: |
