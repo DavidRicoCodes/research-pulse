@@ -8,6 +8,7 @@ split, so papers are merged by DOI and then by a normalized title.
 from __future__ import annotations
 
 import json
+import os
 import re
 import sys
 import time
@@ -61,6 +62,11 @@ def get_text(url: str, retries: int = 3) -> str:
         try:
             with urllib.request.urlopen(request, timeout=30) as response:
                 return response.read().decode(response.headers.get_content_charset() or "utf-8")
+        except urllib.error.HTTPError as exc:
+            # A denied/rate-limited request needs a later scheduled run, not a burst.
+            if exc.code < 500 or attempt + 1 == retries:
+                raise RuntimeError(f"Could not fetch {url}: {exc}") from exc
+            time.sleep(2**attempt)
         except (urllib.error.URLError, TimeoutError) as exc:
             if attempt + 1 == retries:
                 raise RuntimeError(f"Could not fetch {url}: {exc}") from exc
@@ -309,12 +315,13 @@ def main() -> int:
 
     now = datetime.now(timezone.utc)
     live_metadata: dict[str, dict[str, Any]] = {}
-    try:
-        live_metadata["google_scholar"] = collect_google_scholar(
-            researcher["scholar_id"], papers, now.date().isoformat()
-        )
-    except RuntimeError as exc:
-        errors.append(str(exc))
+    if os.environ.get("SCHOLAR_ENABLED", "1") != "0":
+        try:
+            live_metadata["google_scholar"] = collect_google_scholar(
+                researcher["scholar_id"], papers, now.date().isoformat()
+            )
+        except RuntimeError as exc:
+            errors.append(str(exc))
     try:
         source_papers: dict[str, dict[str, Any]] = {}
         collect_openalex(researcher.get("openalex_ids", []), source_papers)

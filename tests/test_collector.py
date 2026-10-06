@@ -1,6 +1,7 @@
 import json
 import tempfile
 import unittest
+import urllib.error
 from pathlib import Path
 from unittest.mock import patch
 
@@ -20,6 +21,16 @@ def snapshot(date, observed, citations):
 
 
 class FallbackTests(unittest.TestCase):
+    def test_scholar_denial_is_not_retried(self):
+        for code in (403, 429):
+            with self.subTest(code=code), \
+                 patch.object(collector.urllib.request, "urlopen", side_effect=urllib.error.HTTPError("https://scholar.google.com", code, "Denied", {}, None)) as request, \
+                 patch.object(collector.time, "sleep") as sleep:
+                with self.assertRaises(RuntimeError):
+                    collector.get_text("https://scholar.google.com")
+                self.assertEqual(request.call_count, 1)
+                sleep.assert_not_called()
+
     def test_blocked_collection_keeps_newest_observation(self):
         history = {"snapshots": [snapshot("2026-10-03", "2026-10-03", 33),
                                  snapshot("2026-10-05", "2026-09-07", 31)]}
