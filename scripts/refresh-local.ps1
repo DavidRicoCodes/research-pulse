@@ -7,13 +7,16 @@ New-Item -ItemType Directory -Path $logDirectory -Force | Out-Null
 Start-Transcript -LiteralPath $logPath -Append | Out-Null
 
 try {
-    Set-Location -LiteralPath $projectRoot
-
-    $pending = git status --porcelain --untracked-files=no
-    if ($LASTEXITCODE -ne 0) { throw 'Could not inspect the Git working tree.' }
-    if ($pending) {
-        throw 'The project has local tracked changes; refresh skipped to avoid overwriting them.'
+    # This checkout belongs exclusively to the scheduled collector.
+    $automationRoot = Join-Path $logDirectory 'automation'
+    if (-not (Test-Path -LiteralPath (Join-Path $automationRoot '.git'))) {
+        git clone 'https://github.com/DavidRicoCodes/research-pulse.git' $automationRoot
+        if ($LASTEXITCODE -ne 0) { throw 'Could not create the automation checkout.' }
     }
+    Set-Location -LiteralPath $automationRoot
+    # A previous failed query may have left a generated, unpublished snapshot.
+    git restore -- 'data/history.json'
+    if ($LASTEXITCODE -ne 0) { throw 'Could not clear the generated automation snapshot.' }
 
     git fetch origin main
     if ($LASTEXITCODE -ne 0) { throw 'Could not fetch origin/main.' }
@@ -22,6 +25,8 @@ try {
     git pull --ff-only origin main
     if ($LASTEXITCODE -ne 0) { throw 'Could not fast-forward main.' }
 
+    git config user.name 'research-pulse-local'
+    git config user.email 'DavidRicoCodes@users.noreply.github.com'
     python collector.py
     if ($LASTEXITCODE -ne 0) { throw 'The collector failed.' }
 
@@ -45,6 +50,10 @@ try {
     git push origin main
     if ($LASTEXITCODE -ne 0) { throw 'Could not push the Scholar snapshot.' }
     Write-Output "Published fresh Google Scholar metrics for $today."
+}
+catch {
+    Write-Output "Refresh failed: $($_.Exception.Message)"
+    throw
 }
 finally {
     Stop-Transcript | Out-Null
