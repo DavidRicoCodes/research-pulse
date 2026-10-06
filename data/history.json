@@ -7838,7 +7838,7 @@
     },
     {
       "date": "2026-10-06",
-      "collected_at": "2026-10-06T11:16:33+00:00",
+      "collected_at": "2026-10-06T18:00:07+00:00",
       "researcher": {
         "name": "David Rico",
         "full_name": "David Rico Menéndez",
@@ -8003,7 +8003,9 @@
           }
         }
       ],
-      "warnings": []
+      "warnings": [
+        "Google Scholar returned an incomplete or blocked profile"
+      ]
     }
   ]
 }
