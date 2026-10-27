@@ -11397,7 +11397,7 @@
     },
     {
       "date": "2026-10-27",
-      "collected_at": "2026-10-27T14:58:41+00:00",
+      "collected_at": "2026-10-27T18:00:05+00:00",
       "researcher": {
         "name": "David Rico",
         "full_name": "David Rico Menéndez",
@@ -11434,7 +11434,7 @@
           },
           "observed_at": "2026-10-27",
           "profile_url": null,
-          "status": "cached"
+          "status": "fresh"
         },
         "openalex": {
           "metrics": {
@@ -11562,9 +11562,7 @@
           }
         }
       ],
-      "warnings": [
-        "Could not fetch https://api.semanticscholar.org/graph/v1/author/2425315603/papers?limit=100&fields=title%2Cyear%2CcitationCount%2Curl%2CexternalIds: HTTP Error 429: "
-      ]
+      "warnings": []
     }
   ]
 }
